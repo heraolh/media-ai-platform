@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ImageIcon, Mic, Film, Trash2, RefreshCw, Clock,
   Play, Pause, Download, ChevronDown, ChevronUp,
-  Loader2, AlertCircle,
+  Loader2, AlertCircle, ExternalLink,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────
@@ -72,12 +72,34 @@ function friendlyErr(msg: string | null): string {
   return "视频生成失败，请重试";
 }
 
+// ─── Confirm Dialog ────────────────────────────────
+function ConfirmDialog({ message, onConfirm, onCancel, loading }: {
+  message: string; onConfirm: () => void; onCancel: () => void; loading: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-6 max-w-sm w-full">
+        <p className="text-sm text-slate-200 mb-5 leading-relaxed">{message}</p>
+        <div className="flex gap-3 justify-end">
+          <button onClick={onCancel} disabled={loading} className="px-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-600 rounded-lg transition-colors disabled:opacity-50">
+            取消
+          </button>
+          <button onClick={onConfirm} disabled={loading} className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            确认删除
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 // ─── Image Panel ─────────────────────────────────────────────
 function ImagePanel() {
   const [items, setItems] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const fetch$ = useCallback(async () => {
@@ -95,7 +117,6 @@ function ImagePanel() {
   useEffect(() => { fetch$(); }, [fetch$]);
 
   async function handleDelete(id: string) {
-    if (!window.confirm("确定要删除这张图片吗？此操作不可撤销。")) return;
     setDeletingId(id);
     try {
       const res = await fetch(`/api/generations?id=${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -104,11 +125,19 @@ function ImagePanel() {
       setItems(prev => prev.filter(g => g.id !== id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "删除失败");
-    } finally { setDeletingId(null); }
+    } finally { setDeletingId(null); setConfirmDeleteId(null); }
   }
 
   return (
     <div>
+      {confirmDeleteId && (
+        <ConfirmDialog
+          message="确定要删除这张图片吗？此操作不可撤销。"
+          onConfirm={() => handleDelete(confirmDeleteId)}
+          onCancel={() => setConfirmDeleteId(null)}
+          loading={deletingId === confirmDeleteId}
+        />
+      )}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm text-slate-400">{items.length} 张图片</span>
         <button onClick={fetch$} disabled={loading} title="刷新"
@@ -151,7 +180,7 @@ function ImagePanel() {
                 </div>
               </div>
               <div className="px-3 pb-3">
-                <button onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}
+                <button onClick={() => setConfirmDeleteId(g.id)} disabled={deletingId === g.id}
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/40 rounded-lg transition-colors disabled:opacity-50">
                   <Trash2 className="w-3.5 h-3.5" />
                   {deletingId === g.id ? "删除中..." : "删除"}
@@ -181,6 +210,7 @@ function SpeechPanel() {
   const [error, setError] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
 
   const fetch$ = useCallback(async () => {
@@ -217,7 +247,6 @@ function SpeechPanel() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("确定要删除这条语音吗？此操作不可撤销。")) return;
     if (audioRefs.current[id]) { audioRefs.current[id].pause(); delete audioRefs.current[id]; }
     if (playingId === id) setPlayingId(null);
     setDeletingId(id);
@@ -228,7 +257,7 @@ function SpeechPanel() {
       setItems(prev => prev.filter(r => r.id !== id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "删除失败");
-    } finally { setDeletingId(null); }
+    } finally { setDeletingId(null); setConfirmDeleteId(null); }
   }
 
   const voiceLabel = (r: SpeechRecord) =>
@@ -236,6 +265,14 @@ function SpeechPanel() {
 
   return (
     <div>
+      {confirmDeleteId && (
+        <ConfirmDialog
+          message="确定要删除这条语音吗？此操作不可撤销。"
+          onConfirm={() => handleDelete(confirmDeleteId)}
+          onCancel={() => setConfirmDeleteId(null)}
+          loading={deletingId === confirmDeleteId}
+        />
+      )}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm text-slate-400">{items.length} 条语音</span>
         <button onClick={fetch$} disabled={loading} title="刷新"
@@ -278,7 +315,7 @@ function SpeechPanel() {
                   </span>
                 </div>
               </div>
-              <button onClick={() => handleDelete(record.id)} disabled={deletingId === record.id}
+              <button onClick={() => setConfirmDeleteId(record.id)} disabled={deletingId === record.id}
                 className="flex-shrink-0 flex items-center gap-1 px-2 py-1.5 text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/40 rounded-lg transition-colors disabled:opacity-50">
                 <Trash2 className="w-3.5 h-3.5" />
                 {deletingId === record.id ? "删除中..." : "删除"}
@@ -296,7 +333,9 @@ function VideoPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [videoErrors, setVideoErrors] = useState<Record<string, boolean>>({});
 
   const fetch$ = useCallback(async () => {
     setLoading(true); setError(null);
@@ -313,7 +352,6 @@ function VideoPanel() {
   useEffect(() => { fetch$(); }, [fetch$]);
 
   async function handleDelete(id: string) {
-    if (!window.confirm("确定要删除这条视频记录吗？此操作不可撤销。")) return;
     if (expandedId === id) setExpandedId(null);
     setDeletingId(id);
     try {
@@ -323,7 +361,7 @@ function VideoPanel() {
       setItems(prev => prev.filter(r => r.id !== id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "删除失败");
-    } finally { setDeletingId(null); }
+    } finally { setDeletingId(null); setConfirmDeleteId(null); }
   }
 
   function downloadVideo(record: VideoRecord) {
@@ -339,6 +377,14 @@ function VideoPanel() {
 
   return (
     <div>
+      {confirmDeleteId && (
+        <ConfirmDialog
+          message="确定要删除这条视频记录吗？此操作不可撤销。"
+          onConfirm={() => handleDelete(confirmDeleteId)}
+          onCancel={() => setConfirmDeleteId(null)}
+          loading={deletingId === confirmDeleteId}
+        />
+      )}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm text-slate-400">{items.length} 条视频</span>
         <button onClick={fetch$} disabled={loading} title="刷新"
@@ -391,7 +437,7 @@ function VideoPanel() {
                         {isExpanded ? "收起" : "播放"}
                       </button>
                     )}
-                    <button onClick={() => handleDelete(record.id)} disabled={deletingId === record.id}
+                    <button onClick={() => setConfirmDeleteId(record.id)} disabled={deletingId === record.id}
                       className="flex items-center gap-1 px-2 py-1 text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/40 rounded transition-colors disabled:opacity-50">
                       <Trash2 className="w-3.5 h-3.5" />
                       {deletingId === record.id ? "删除中..." : "删除"}
@@ -401,7 +447,25 @@ function VideoPanel() {
                 {isExpanded && isSuccess && record.video_url && (
                   <div className="border-t border-slate-700 p-3 space-y-2 bg-slate-950/30">
                     {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                    <video controls autoPlay src={record.video_url} className="w-full rounded-lg max-h-[300px] bg-black" />
+                    {videoErrors[record.id] ? (
+                      <div className="w-full rounded-lg bg-slate-900 border border-slate-700 p-6 text-center space-y-3">
+                        <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
+                        <p className="text-sm text-slate-400">视频链接已过期，请尝试在新窗口打开</p>
+                        <a href={record.video_url ?? ''}
+                          target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded-lg transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          在新窗口打开
+                        </a>
+                      </div>
+                    ) : (
+                      // eslint-disable-next-line jsx-a11y/media-has-caption
+                      <video controls autoPlay src={record.video_url ?? ''}
+                        className="w-full rounded-lg max-h-[300px] bg-black"
+                        onError={() => setVideoErrors(prev => ({ ...prev, [record.id]: true }))}
+                      />
+                    )}
                     <button onClick={() => downloadVideo(record)}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">
                       <Download className="w-3.5 h-3.5" />下载视频

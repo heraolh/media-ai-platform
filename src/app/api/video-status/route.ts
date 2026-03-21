@@ -45,13 +45,29 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Record not found" }, { status: 404 });
     }
 
-    // 如果已经成功或失败，直接返回数据库状态
-    if (record.status === "success" || record.status === "failed") {
+    // 如果已失败，直接返回
+    if (record.status === "failed") {
       return NextResponse.json({
         status: record.status,
         video_url: record.video_url,
         error_msg: record.error_msg,
       });
+    }
+
+    // 如果已成功，检查 video_url 是否为永久 URL（Supabase 存储）
+    // 若是 MiniMax 临时 URL 则继续往下重新转存
+    if (record.status === "success") {
+      const url = record.video_url ?? "";
+      const isPersistent = url.includes(".supabase.co") || url.includes(".supabase.in");
+      if (isPersistent) {
+        return NextResponse.json({
+          status: record.status,
+          video_url: record.video_url,
+          error_msg: record.error_msg,
+        });
+      }
+      // 临时 URL：继续执行下方转存逻辑
+      console.log("[video-status] 检测到临时 URL，尝试重新转存...");
     }
 
     // 还在处理中：查询 MiniMax API
@@ -113,7 +129,7 @@ export async function GET(req: NextRequest) {
                 .from("media-files")
                 .upload(storagePath, videoBuffer, {
                   contentType: "video/mp4",
-                  upsert: false,
+                  upsert: true,
                 });
 
               if (uploadError) {
