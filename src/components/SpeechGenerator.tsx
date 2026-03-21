@@ -80,6 +80,8 @@ export function SpeechGenerator() {
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Mic className="w-5 h-5 text-purple-400" />
             语音合成
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">语音</span>
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">消耗 2 积分</span>
           </h2>
           <p className="text-sm text-slate-400 mt-1">
             输入文本，选择音色，生成 MP3 音频。

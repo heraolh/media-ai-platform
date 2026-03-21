@@ -95,6 +95,7 @@ function ImagePanel() {
   useEffect(() => { fetch$(); }, [fetch$]);
 
   async function handleDelete(id: string) {
+    if (!window.confirm("确定要删除这张图片吗？此操作不可撤销。")) return;
     setDeletingId(id);
     try {
       const res = await fetch(`/api/generations?id=${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -216,6 +217,7 @@ function SpeechPanel() {
   }
 
   async function handleDelete(id: string) {
+    if (!window.confirm("确定要删除这条语音吗？此操作不可撤销。")) return;
     if (audioRefs.current[id]) { audioRefs.current[id].pause(); delete audioRefs.current[id]; }
     if (playingId === id) setPlayingId(null);
     setDeletingId(id);
@@ -311,6 +313,7 @@ function VideoPanel() {
   useEffect(() => { fetch$(); }, [fetch$]);
 
   async function handleDelete(id: string) {
+    if (!window.confirm("确定要删除这条视频记录吗？此操作不可撤销。")) return;
     if (expandedId === id) setExpandedId(null);
     setDeletingId(id);
     try {

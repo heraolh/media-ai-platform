@@ -145,6 +145,7 @@ export function VideoGenerator() {
             <Film className="w-5 h-5 text-blue-400" />
             AI 视频
             <span className="text-xs font-normal px-1.5 py-0.5 bg-red-500/20 text-red-300 rounded border border-red-500/30">视频</span>
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">消耗 50 积分</span>
           </h2>
           <p className="text-sm text-slate-400 mt-1">
             输入描述，AI 生成视频（约需 1–3 分钟）。可选上传参考图实现图生视频。
@@ -202,9 +203,9 @@ export function VideoGenerator() {
           className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            <><Loader2 className="w-5 h-5 animate-spin" />提交中...</>
+            <>Loader2 className="w-5 h-5 animate-spin" />提交中...</>
           ) : (
-            <><Film className="w-5 h-5" />生成视频</>
+            <>Film className="w-5 h-5" />生成视频</>
           )}
         </button>
 

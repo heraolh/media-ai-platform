@@ -81,6 +81,7 @@ export function ImageGenerator() {
             <Sparkles className="w-5 h-5 text-blue-400" />
             AI 生图
             <span className="text-xs font-normal px-1.5 py-0.5 bg-blue-500/20 text-blue-300 rounded border border-blue-500/30">图片</span>
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">消耗 10 积分</span>
           </h2>
           <p className="text-sm text-slate-400 mt-1">
             输入提示词，AI 生成图片并自动保存。
