@@ -5,7 +5,7 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover"
+  apiVersion: "2026-02-25.clover",
 });
 
 // 积分包配置：credits -> price_cents
