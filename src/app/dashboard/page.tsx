@@ -6,7 +6,9 @@ import { GenerationHistory } from '@/components/GenerationHistory'
 import { SpeechGenerator } from '@/components/SpeechGenerator'
 import { SpeechHistory } from '@/components/SpeechHistory'
 import { VideoGenerator } from '@/components/VideoGenerator'
+import { VideoHistory } from '@/components/VideoHistory'
 import { CreditSystem } from '@/components/CreditSystem'
+import { LogoutButton } from '@/components/LogoutButton'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -21,7 +23,10 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">仪表盘</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">仪表盘</h1>
+          <LogoutButton />
+        </div>
         <p className="text-slate-300 mb-8">欢迎回来，{user.email}</p>
 
         {/* 积分系统 */}
@@ -38,6 +43,9 @@ export default async function DashboardPage() {
 
         {/* 视频生成 */}
         <VideoGenerator />
+
+        {/* 视频历史 */}
+        <VideoHistory />
 
         {/* 生成历史 */}
         <GenerationHistory />
