@@ -45,12 +45,12 @@ export function VideoGenerator() {
         } else if (data.status === "failed") {
           stopPolling();
           setStatus("failed");
-          setError(data.error_msg || "视频生成失败");
+          setError(data.error_msg || "\u89c6\u9891\u751f\u6210\u5931\u8d25");
         } else {
           setProgress(typeof data.progress === "number" ? data.progress : 0);
         }
       } catch (e) {
-        console.error("轮询出错:", e);
+        console.error("\u8f6e\u8be2\u51fa\u9519:", e);
       }
     },
     [stopPolling]
@@ -105,15 +105,15 @@ export function VideoGenerator() {
       const rawText = await res.text();
       let data: { id?: string; task_id?: string; error?: string } = {};
       try { data = JSON.parse(rawText); } catch { /* non-JSON */ }
-      if (!res.ok) throw new Error(data?.error || rawText || `提交失败 (${res.status})`);
-      if (!data.id) throw new Error("未返回任务 ID");
+      if (!res.ok) throw new Error(data?.error || rawText || `\u63d0\u4ea4\u5931\u8d25 (${res.status})`);
+      if (!data.id) throw new Error("\u672a\u8fd4\u56de\u4efb\u52a1 ID");
       const newTask: VideoTask = { id: data.id, task_id: data.task_id ?? "" };
       setTask(newTask);
       setStatus("processing");
       startPolling(newTask.id);
     } catch (e) {
       setStatus("failed");
-      setError(e instanceof Error ? e.message : "提交失败");
+      setError(e instanceof Error ? e.message : "\u63d0\u4ea4\u5931\u8d25");
     }
   }
 
@@ -143,19 +143,19 @@ export function VideoGenerator() {
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Film className="w-5 h-5 text-blue-400" />
-            AI 视频
-            <span className="text-xs font-normal px-1.5 py-0.5 bg-red-500/20 text-red-300 rounded border border-red-500/30">视频</span>
-            <span className="text-xs font-normal px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">消耗 50 积分</span>
+            AI \u89c6\u9891
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-red-500/20 text-red-300 rounded border border-red-500/30">\u89c6\u9891</span>
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">\u6d88\u8017 50 \u79ef\u5206</span>
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            输入描述，AI 生成视频（约需 1–3 分钟）。可选上传参考图实现图生视频。
+            \u8f93\u5165\u63cf\u8ff0\uff0cAI \u751f\u6210\u89c6\u9891\uff08\u7ea6\u9700 1\u20133 \u5206\u949f\uff09\u3002\u53ef\u9009\u4e0a\u4f20\u53c2\u8003\u56fe\u5b9e\u73b0\u56fe\u751f\u89c6\u9891\u3002
           </p>
         </div>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-1">
-          <label className="text-sm text-slate-300" htmlFor="video-prompt">视频描述</label>
+          <label className="text-sm text-slate-300" htmlFor="video-prompt">\u89c6\u9891\u63cf\u8ff0</label>
           <textarea
             id="video-prompt"
             value={prompt}
@@ -163,15 +163,15 @@ export function VideoGenerator() {
             rows={3}
             disabled={isSubmitting || isProcessing}
             className="w-full bg-slate-950/30 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-blue-500 resize-none text-slate-100 placeholder:text-slate-500 disabled:opacity-50"
-            placeholder="例如：一只橘猫在樱花树下慵懒地伸展，阳光洒落，花瓣飘舞"
+            placeholder="\u4f8b\u5982\uff1a\u4e00\u53ea\u6a58\u732b\u5728\u6?\u82b1\u6811\u4e0b\u6175\u61d2\u5730\u4f38\u5c55\uff0c\u9633\u5149\u6d12\u843d\uff0c\u82b1\u74e3\u98d8\u821e"
           />
         </div>
 
         <div className="space-y-1">
-          <p className="text-sm text-slate-300">参考图（可选，用于图生视频）</p>
+          <p className="text-sm text-slate-300">\u53c2\u8003\u56fe\uff08\u53ef\u9009\uff0c\u7528\u4e8e\u56fe\u751f\u89c6\u9891\uff09</p>
           {imageUrl ? (
             <div className="relative inline-block">
-              <img src={imageUrl} alt="参考图" className="h-24 w-auto rounded-lg border border-slate-600 object-cover" />
+              <img src={imageUrl} alt="\u53c2\u8003\u56fe" className="h-24 w-auto rounded-lg border border-slate-600 object-cover" />
               <button
                 onClick={removeImage}
                 className="absolute -top-2 -right-2 w-5 h-5 bg-slate-700 hover:bg-red-600 border border-slate-500 rounded-full flex items-center justify-center transition-colors"
@@ -190,7 +190,7 @@ export function VideoGenerator() {
               className="flex items-center gap-2 px-4 py-2 border border-dashed border-slate-600 hover:border-blue-500 rounded-lg text-sm text-slate-400 hover:text-blue-400 transition-colors disabled:opacity-50"
             >
               <Upload className="w-4 h-4" />
-              上传参考图
+              \u4e0a\u4f20\u53c2\u8003\u56fe
             </button>
           )}
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
@@ -203,9 +203,9 @@ export function VideoGenerator() {
           className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            <>Loader2 className="w-5 h-5 animate-spin" />提交中...</>
+            <><Loader2 className="w-5 h-5 animate-spin" />\u63d0\u4ea4\u4e2d...</>
           ) : (
-            <>Film className="w-5 h-5" />生成视频</>
+            <><Film className="w-5 h-5" />\u751f\u6210\u89c6\u9891</>
           )}
         </button>
 
@@ -214,12 +214,12 @@ export function VideoGenerator() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-blue-300 text-sm font-medium">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                生成中...（约需 1–3 分钟）
+                \u751f\u6210\u4e2d\u2026\u2026\uff08\u7ea6\u9700 1\u20133 \u5206\u949f\uff09
               </div>
               <button
                 onClick={onManualRefresh}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-                title="手动刷新状态"
+                title="\u624b\u52a8\u5237\u65b0\u72b6\u6001"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -237,7 +237,7 @@ export function VideoGenerator() {
                 Task ID: <span className="text-slate-400">{task.task_id}</span>
               </p>
             )}
-            <p className="text-xs text-slate-500 mt-1">{polling ? "自动轮询中（每 3 秒）" : ""}</p>
+            <p className="text-xs text-slate-500 mt-1">{polling ? "\u81ea\u52a8\u8f6e\u8be2\u4e2d\uff08\u6bcf 3 \u79d2\uff09" : ""}</p>
           </div>
         )}
 
@@ -250,7 +250,7 @@ export function VideoGenerator() {
         {isSuccess && videoUrl && (
           <div className="space-y-3">
             <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-3">
-              <p className="text-xs text-slate-400 mb-2">视频播放</p>
+              <p className="text-xs text-slate-400 mb-2">\u89c6\u9891\u64ad\u653e</p>
               {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video controls src={videoUrl} className="w-full rounded-md max-h-[480px]" />
             </div>
@@ -260,11 +260,11 @@ export function VideoGenerator() {
               className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" />
-              下载视频
+              \u4e0b\u8f7d\u89c6\u9891
             </button>
             {task?.id && (
               <p className="text-xs text-slate-500">
-                记录 ID：<span className="text-slate-300">{task.id}</span>
+                \u8bb0\u5f55 ID\uff1a<span className="text-slate-300">{task.id}</span>
               </p>
             )}
           </div>
@@ -272,7 +272,7 @@ export function VideoGenerator() {
 
         {isSuccess && !videoUrl && (
           <div className="text-sm text-slate-400 bg-slate-700/30 border border-slate-600 rounded-lg p-3">
-            视频已生成，但暂未获取到下载链接。请稍后刷新页面查看。
+            \u89c6\u9891\u5df2\u751f\u6210\uff0c\u4f46\u6682\u672a\u83b7\u53d6\u5230\u4e0b\u8f7d\u94fe\u63a5\u3002\u8bf7\u7a0d\u540e\u5237\u65b0\u9875\u9762\u67e5\u770b\u3002
           </div>
         )}
       </div>
