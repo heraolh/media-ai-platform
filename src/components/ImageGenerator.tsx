@@ -78,11 +78,12 @@ export function ImageGenerator() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-300" />
-            天文生图
+            <Sparkles className="w-5 h-5 text-blue-400" />
+            AI 生图
+            <span className="text-xs font-normal px-1.5 py-0.5 bg-blue-500/20 text-blue-300 rounded border border-blue-500/30">图片</span>
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            输入提示词，点击生成。图片将保存到 Supabase 并返回可下载链接。
+            输入提示词，AI 生成图片并自动保存。
           </p>
         </div>
       </div>
@@ -106,7 +107,7 @@ export function ImageGenerator() {
           type="button"
           onClick={onGenerate}
           disabled={loading || prompt.trim().length === 0}
-          className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
           {loading ? "生成中..." : "生成图片"}

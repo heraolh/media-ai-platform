@@ -98,7 +98,7 @@ export function SpeechGenerator() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={4}
-            className="w-full h-32 bg-slate-950/30 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-purple-500 resize-none text-slate-100 placeholder:text-slate-500"
+            className="w-full h-32 bg-slate-950/30 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-blue-500 resize-none text-slate-100 placeholder:text-slate-500"
             placeholder="例如：你好，欢迎使用语音合成功能。"
           />
         </div>
@@ -112,7 +112,7 @@ export function SpeechGenerator() {
             id="voice-select"
             value={voice}
             onChange={(e) => setVoice(e.target.value as VoiceValue)}
-            className="w-full bg-slate-950/30 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-purple-500 text-slate-100 appearance-none cursor-pointer"
+            className="w-full bg-slate-950/30 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-blue-500 text-slate-100 appearance-none cursor-pointer"
           >
             {VOICE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value} className="bg-slate-800">
@@ -127,7 +127,7 @@ export function SpeechGenerator() {
           type="button"
           onClick={onGenerate}
           disabled={loading || text.trim().length === 0}
-          className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />

@@ -5,7 +5,7 @@ import { Coins, X, ExternalLink, Loader2 } from "lucide-react";
 
 interface CreditPackage {
   credits: number;
-  price: number; // 元
+  price: number;
   label: string;
   popular?: boolean;
 }
@@ -38,12 +38,10 @@ export function CreditSystem() {
     fetchCredits();
   }, [fetchCredits]);
 
-  // 检查支付回调参数
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") === "success") {
       fetchCredits();
-      // 清理 URL 参数
       const url = new URL(window.location.href);
       url.searchParams.delete("payment");
       url.searchParams.delete("credits");
@@ -75,17 +73,17 @@ export function CreditSystem() {
       {/* 积分显示栏 */}
       <div className="flex items-center justify-between mb-6 p-4 bg-slate-800/60 border border-slate-700 rounded-xl">
         <div className="flex items-center gap-2">
-          <Coins className="w-5 h-5 text-yellow-400" />
+          <Coins className="w-5 h-5 text-blue-400" />
           <span className="text-sm text-slate-300">积分余额</span>
           {loading ? (
             <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
           ) : (
-            <span className="text-lg font-bold text-yellow-300">{amount ?? 0}</span>
+            <span className="text-lg font-bold text-white">{amount ?? 0}</span>
           )}
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-slate-900 rounded-lg text-sm font-semibold transition-colors"
+          className="px-4 py-1.5 bg-transparent hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 rounded-lg text-sm font-medium transition-colors"
         >
           充值积分
         </button>
@@ -103,7 +101,7 @@ export function CreditSystem() {
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold flex items-center gap-2">
-                <Coins className="w-5 h-5 text-yellow-400" />
+                <Coins className="w-5 h-5 text-blue-400" />
                 充值积分
               </h3>
               <button
@@ -120,9 +118,9 @@ export function CreditSystem() {
                   key={pkg.credits}
                   onClick={() => handlePurchase(pkg)}
                   disabled={purchasing !== null}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-colors disabled:opacity-60 ${
+                  className={`w-full p-4 rounded-xl border text-left transition-colors disabled:opacity-60 ${
                     pkg.popular
-                      ? "border-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20"
+                      ? "border-blue-500 bg-blue-500/10 hover:bg-blue-500/20"
                       : "border-slate-600 bg-slate-700/50 hover:bg-slate-700"
                   }`}
                 >
@@ -131,7 +129,7 @@ export function CreditSystem() {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-white">{pkg.credits} 积分</span>
                         {pkg.popular && (
-                          <span className="text-xs bg-yellow-500 text-slate-900 px-1.5 py-0.5 rounded font-semibold">
+                          <span className="text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded font-semibold">
                             推荐
                           </span>
                         )}
@@ -140,11 +138,11 @@ export function CreditSystem() {
                     </div>
                     <div className="text-right">
                       {purchasing === pkg.credits ? (
-                        <Loader2 className="w-5 h-5 animate-spin text-yellow-400" />
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
                       ) : (
                         <>
-                          <p className="font-bold text-yellow-300">¥{pkg.price}</p>
-                          <ExternalLink className="w-3.5 h-3.5 text-slate-400 ml-auto mt-0.5" />
+                          <p className="font-bold text-white">¥{pkg.price}</p>
+                          <ExternalLink className="w-3.5 h-3.5 text-slate-500 ml-auto mt-0.5" />
                         </>
                       )}
                     </div>
