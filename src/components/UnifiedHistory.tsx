@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ImageIcon, Mic, Film, Trash2, RefreshCw, Clock,
   Play, Pause, Download, ChevronDown, ChevronUp,
-  Loader2, AlertCircle, ExternalLink, Layers,
+  Loader2, AlertCircle, ExternalLink, Layers, Layers,
   CheckCircle2, XCircle,
 } from "lucide-react";
 
@@ -500,13 +500,173 @@ function VideoPanel() {
   );
 }
 // ─── Main Export ─────────────────────────────────────────────
+function WorkflowPanel() {
+  const [items, setItems] = useState<WorkflowRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [dlId, setDlId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/workflows");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "获取失败");
+      setItems(data.workflows ?? []);
+    } catch (e) { setError(e instanceof Error ? e.message : "获取失败"); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function handleDelete(id: string) {
+    if (expandedId === id) setExpandedId(null);
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/workflows/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "删除失败");
+      setItems(prev => prev.filter(w => w.id !== id));
+    } catch (e) { setError(e instanceof Error ? e.message : "删除失败"); }
+    finally { setDeletingId(null); setConfirmId(null); }
+  }
+
+  async function handleDownload(wf: WorkflowRecord) {
+    const { image, video, speech } = wf.results;
+    if (!image && !video && !speech) return;
+    setDlId(wf.id);
+    try {
+      const { default: JSZip } = await import("jszip");
+      const zip = new JSZip();
+      const folder = zip.folder("smartkit")!;
+      const buf = async (url: string) => (await fetch(url)).arrayBuffer();
+      if (image) folder.file("image.png", await buf(image));
+      if (video) folder.file("video.mp4", await buf(video));
+      if (speech) folder.file("speech.mp3", await buf(speech));
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `smartkit-${wf.id.slice(0,8)}.zip`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch { /* ignore */ } finally { setDlId(null); }
+  }
+
+  const STATUS: Record<string, { label: string; color: string }> = {
+    pending:    { label: "等待中",   color: "text-slate-400" },
+    image_done: { label: "图片完成", color: "text-blue-400" },
+    video_done: { label: "视频完成", color: "text-indigo-400" },
+    completed:  { label: "已完成",  color: "text-emerald-400" },
+    failed:     { label: "失败",    color: "text-red-400" },
+  };
+
+  return (
+    <div>
+      {confirmId && (
+        <ConfirmDialog
+          message="确定删除这条工作流记录？此操作不可撤销。"
+          onConfirm={() => handleDelete(confirmId)}
+          onCancel={() => setConfirmId(null)}
+          loading={deletingId === confirmId}
+        />
+      )}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm text-slate-400">{items.length} 条工作流</span>
+        <button onClick={load} disabled={loading} title="刷新"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-50">
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </button>
+      </div>
+      {error && <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">{error}</div>}
+      {loading && <div className="space-y-2">{[1,2,3].map(n => <div key={n} className="h-16 bg-slate-700/50 rounded-lg animate-pulse" />)}</div>}
+      {!loading && items.length === 0 && !error && (
+        <div className="text-center py-16 text-slate-400">
+          <Layers className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p>暂无工作流记录，快去使用 SmartKit 吧！</p>
+        </div>
+      )}
+      {!loading && items.length > 0 && (
+        <div className="space-y-3">
+          {items.map(wf => {
+            const st = STATUS[wf.status] ?? { label: wf.status, color: "text-slate-400" };
+            const isDone = wf.status === "completed";
+            const isExpanded = expandedId === wf.id;
+            const hasResults = !!(wf.results.image || wf.results.video || wf.results.speech);
+            return (
+              <div key={wf.id} className="bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-colors">
+                <div className="flex items-center gap-3 px-3 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-200 truncate" title={wf.prompt}>{wf.prompt}</p>
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className={`text-xs font-medium ${st.color}`}>{st.label}</span>
+                      <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDate(wf.created_at)}</span>
+                      <span className="text-xs text-slate-500">{wf.credits_used} 积分</span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 flex items-center gap-1">
+                    {hasResults && (
+                      <button onClick={() => setExpandedId(isExpanded ? null : wf.id)}
+                        className="flex items-center gap-1 px-2 py-1 text-xs text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-700 rounded transition-colors">
+                        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        {isExpanded ? "收起" : "展开"}
+                      </button>
+                    )}
+                    {isDone && hasResults && (
+                      <button onClick={() => handleDownload(wf)} disabled={dlId === wf.id}
+                        className="flex items-center gap-1 px-2 py-1 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30 rounded transition-colors disabled:opacity-50">
+                        {dlId === wf.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}下载
+                      </button>
+                    )}
+                    <button onClick={() => setConfirmId(wf.id)} disabled={deletingId === wf.id}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/40 rounded transition-colors disabled:opacity-50">
+                      <Trash2 className="w-3 h-3" />
+                      {deletingId === wf.id ? "删除中..." : "删除"}
+                    </button>
+                  </div>
+                </div>
+                {isExpanded && hasResults && (
+                  <div className="border-t border-slate-700 p-3 bg-slate-950/30">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {wf.results.image && (
+                        <div className="rounded-lg overflow-hidden border border-slate-700">
+                          <p className="text-xs text-slate-400 px-2 py-1.5 border-b border-slate-700 flex items-center gap-1"><ImageIcon className="w-3 h-3" /> 生成图片</p>
+                          <img src={wf.results.image} alt="" className="w-full aspect-video object-cover" />
+                        </div>
+                      )}
+                      {wf.results.video && (
+                        <div className="rounded-lg overflow-hidden border border-slate-700">
+                          <p className="text-xs text-slate-400 px-2 py-1.5 border-b border-slate-700 flex items-center gap-1"><Film className="w-3 h-3" /> 生成视频</p>
+                          <video controls src={wf.results.video} className="w-full aspect-video object-cover bg-black" />
+                        </div>
+                      )}
+                      {wf.results.speech && (
+                        <div className="rounded-lg border border-slate-700 p-3 flex flex-col items-center justify-center gap-2">
+                          <p className="text-xs text-slate-400 flex items-center gap-1"><Mic className="w-3 h-3" /> 语音合成</p>
+                          <audio controls src={wf.results.speech} className="w-full" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 export function UnifiedHistory() {
   const [activeTab, setActiveTab] = useState<Tab>("image");
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; badgeCls: string }[] = [
-    { id: "image",  label: "图片", icon: <ImageIcon className="w-4 h-4" />, badgeCls: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
-    { id: "speech", label: "语音", icon: <Mic className="w-4 h-4" />,      badgeCls: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
-    { id: "video",  label: "视频", icon: <Film className="w-4 h-4" />,     badgeCls: "bg-red-500/20 text-red-300 border-red-500/30" },
+    { id: "image",    label: "\u56fe\u7247",   icon: <ImageIcon className="w-4 h-4" />, badgeCls: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
+    { id: "speech",   label: "\u8bed\u97f3",   icon: <Mic className="w-4 h-4" />,       badgeCls: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
+    { id: "video",    label: "\u89c6\u9891",   icon: <Film className="w-4 h-4" />,      badgeCls: "bg-red-500/20 text-red-300 border-red-500/30" },
+    { id: "workflow", label: "\u5de5\u4f5c\u6d41", icon: <Layers className="w-4 h-4" />,   badgeCls: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" },
   ];
 
   return (
@@ -538,9 +698,10 @@ export function UnifiedHistory() {
       </div>
 
       {/* Panel */}
-      {activeTab === "image"  && <ImagePanel />}
-      {activeTab === "speech" && <SpeechPanel />}
-      {activeTab === "video"  && <VideoPanel />}
+      {activeTab === "image"    && <ImagePanel />}
+      {activeTab === "speech"   && <SpeechPanel />}
+      {activeTab === "video"    && <VideoPanel />}
+      {activeTab === "workflow" && <WorkflowPanel />}
     </section>
   );
 }

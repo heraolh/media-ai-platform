@@ -60,3 +60,27 @@ export async function GET(
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  ctx: RouteContext<"/api/workflows/[id]">
+) {
+  try {
+    const { id } = await ctx.params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { error } = await supabase
+      .from("workflows")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to delete workflow";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
