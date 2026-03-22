@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { FileUpload } from '@/components/FileUpload'
+import { MyAssets } from '@/components/MyAssets'
 import { ImageGenerator } from '@/components/ImageGenerator'
 import { SpeechGenerator } from '@/components/SpeechGenerator'
 import { VideoGenerator } from '@/components/VideoGenerator'
@@ -56,13 +56,8 @@ export default async function DashboardPage() {
           {/* 生成历史（图片 / 语音 / 视频统一标签页） */}
           <UnifiedHistory />
 
-          {/* 文件上传 */}
-          <div className="mb-8 p-6 bg-slate-800 rounded-lg border border-slate-700">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <span>📁</span> 文件上传
-            </h2>
-            <FileUpload />
-          </div>
+          {/* 我的素材库 */}
+          <MyAssets />
         </div>
       </div>
     </div>

@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ImageIcon, Mic, Film, Trash2, RefreshCw, Clock,
   Play, Pause, Download, ChevronDown, ChevronUp,
-  Loader2, AlertCircle, ExternalLink,
+  Loader2, AlertCircle, ExternalLink, Layers,
+  CheckCircle2, XCircle,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────
@@ -35,7 +36,25 @@ interface VideoRecord {
   created_at: string;
 }
 
-type Tab = "image" | "speech" | "video";
+type Tab = "image" | "speech" | "video" | "workflow";
+
+// ─── Workflow types ───────────────────────────────────────────
+interface WorkflowResults {
+  image?: string;
+  video?: string;
+  speech?: string;
+}
+
+interface WorkflowRecord {
+  id: string;
+  prompt: string;
+  name: string | null;
+  status: string;
+  failed_step: string | null;
+  results: WorkflowResults;
+  credits_used: number;
+  created_at: string;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────
 function formatDate(iso: string) {
