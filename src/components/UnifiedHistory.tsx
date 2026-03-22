@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { ImageUnderstandHistoryPanel } from "./ImageUnderstandHistoryPanel";
@@ -664,12 +664,12 @@ export function UnifiedHistory() {
   const [activeTab, setActiveTab] = useState<Tab>("image");
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "image",            label: "u{56FE}u{7247}",       icon: <ImageIcon className="w-4 h-4" /> },
-    { id: "speech",           label: "u{8BED}u{97F3}",       icon: <Mic className="w-4 h-4" /> },
-    { id: "video",            label: "u{89C6}u{9891}",       icon: <Film className="w-4 h-4" /> },
-    { id: "workflow",         label: "u{5DE5}u{4F5C}u{6D41}",     icon: <Layers className="w-4 h-4" /> },
-    { id: "image_understand", label: "u{56FE}u{6587}u{7406}u{89E3}",   icon: <Eye className="w-4 h-4" /> },
-    { id: "speech_to_text",   label: "u{8BED}u{97F3}u{8F6C}u{6587}u{5B57}", icon: <FileText className="w-4 h-4" /> },
+    { id: "image",            label: "图片",       icon: <ImageIcon className="w-4 h-4" /> },
+    { id: "speech",           label: "语音",       icon: <Mic className="w-4 h-4" /> },
+    { id: "video",            label: "视频",       icon: <Film className="w-4 h-4" /> },
+    { id: "workflow",         label: "工作流",     icon: <Layers className="w-4 h-4" /> },
+    { id: "image_understand", label: "图文理解",   icon: <Eye className="w-4 h-4" /> },
+    { id: "speech_to_text",   label: "语音转文字", icon: <FileText className="w-4 h-4" /> },
   ]
 
   return (
@@ -707,3 +707,4 @@ export function UnifiedHistory() {
     </section>
   );
 }
+
