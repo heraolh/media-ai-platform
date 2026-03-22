@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { ImageUnderstandHistoryPanel } from "./ImageUnderstandHistoryPanel";
+import { SpeechToTextHistoryPanel } from "./SpeechToTextHistoryPanel";
 import {
   ImageIcon, Mic, Film, Trash2, RefreshCw, Clock,
   Play, Pause, Download, ChevronDown, ChevronUp,
-  Loader2, AlertCircle, ExternalLink, Layers,
+  Loader2, AlertCircle, ExternalLink, Layers, Eye, FileText,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────
@@ -35,7 +37,7 @@ interface VideoRecord {
   created_at: string;
 }
 
-type Tab = "image" | "speech" | "video" | "workflow";
+type Tab = "image" | "speech" | "video" | "workflow" | "image_understand" | "speech_to_text";
 
 // ─── Workflow types ───────────────────────────────────────────
 interface WorkflowResults {
@@ -661,12 +663,14 @@ function WorkflowPanel() {
 export function UnifiedHistory() {
   const [activeTab, setActiveTab] = useState<Tab>("image");
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; badgeCls: string }[] = [
-    { id: "image",    label: "\u56fe\u7247",   icon: <ImageIcon className="w-4 h-4" />, badgeCls: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
-    { id: "speech",   label: "\u8bed\u97f3",   icon: <Mic className="w-4 h-4" />,       badgeCls: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
-    { id: "video",    label: "\u89c6\u9891",   icon: <Film className="w-4 h-4" />,      badgeCls: "bg-red-500/20 text-red-300 border-red-500/30" },
-    { id: "workflow", label: "\u5de5\u4f5c\u6d41", icon: <Layers className="w-4 h-4" />,   badgeCls: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" },
-  ];
+  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: "image",            label: "u{56FE}u{7247}",       icon: <ImageIcon className="w-4 h-4" /> },
+    { id: "speech",           label: "u{8BED}u{97F3}",       icon: <Mic className="w-4 h-4" /> },
+    { id: "video",            label: "u{89C6}u{9891}",       icon: <Film className="w-4 h-4" /> },
+    { id: "workflow",         label: "u{5DE5}u{4F5C}u{6D41}",     icon: <Layers className="w-4 h-4" /> },
+    { id: "image_understand", label: "u{56FE}u{6587}u{7406}u{89E3}",   icon: <Eye className="w-4 h-4" /> },
+    { id: "speech_to_text",   label: "u{8BED}u{97F3}u{8F6C}u{6587}u{5B57}", icon: <FileText className="w-4 h-4" /> },
+  ]
 
   return (
     <section className="mb-8 p-6 bg-slate-800 rounded-lg border border-slate-700">
@@ -689,10 +693,7 @@ export function UnifiedHistory() {
           >
             {tab.icon}
             {tab.label}
-            <span className={`text-xs px-1.5 py-0.5 rounded border ${tab.badgeCls}`}>
-              {tab.label}
-            </span>
-          </button>
+            </button>
         ))}
       </div>
 
@@ -700,7 +701,9 @@ export function UnifiedHistory() {
       {activeTab === "image"    && <ImagePanel />}
       {activeTab === "speech"   && <SpeechPanel />}
       {activeTab === "video"    && <VideoPanel />}
-      {activeTab === "workflow" && <WorkflowPanel />}
+      {activeTab === "workflow"         && <WorkflowPanel />}
+      {activeTab === "image_understand" && <ImageUnderstandHistoryPanel />}
+      {activeTab === "speech_to_text"   && <SpeechToTextHistoryPanel />}
     </section>
   );
 }

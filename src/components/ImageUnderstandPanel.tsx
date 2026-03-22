@@ -87,7 +87,12 @@ export function ImageUnderstandPanel() {
         {/* Left: asset selector */}
         <div className="lg:col-span-1 bg-slate-900/50 rounded-xl border border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-slate-300">选择图片</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-slate-300">选择图片</p>
+              {selectedAsset && (
+                <button onClick={() => setSelectedAsset(null)} className="text-xs text-slate-500 hover:text-white transition-colors px-1.5 py-0.5 rounded bg-slate-700/50 hover:bg-slate-700">✕ 取消选择</button>
+              )}
+            </div>
             <button onClick={loadAssets} disabled={assetsLoading} className="p-1 text-slate-400 hover:text-white transition-colors disabled:opacity-50">
               <RefreshCw className={`w-3.5 h-3.5 ${assetsLoading ? "animate-spin" : ""}`} />
             </button>
