@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         .limit(3);
       if (data) {
         for (const row of data) {
-          const r = row as Record<string, unknown>;
+          const r = row as unknown as Record<string, unknown>;
           const p = r[promptField] as string | undefined;
           const fb = r["feedback_text"] as string | null;
           if (p) lowRatedSamples.push(`原始提示词: "${p}"${fb ? `，用户反馈: "${fb}"` : ""}`);
