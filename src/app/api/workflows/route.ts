@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -84,10 +85,10 @@ export async function POST(req: NextRequest) {
     const id = workflowId as string;
 
     // 异步触发 execute（fire-and-forget）
-    const executeUrl = new URL(
-      `/api/workflows/${id}/execute`,
-      req.url
-    ).toString();
+    const headersList = await headers();
+    const host = headersList.get("host") ?? "localhost:3000";
+    const protocol = host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https";
+    const executeUrl = `${protocol}://${host}/api/workflows/${id}/execute`;
 
     fetch(executeUrl, {
       method: "POST",
