@@ -4,8 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ImageIcon, Mic, Film, Trash2, RefreshCw, Clock,
   Play, Pause, Download, ChevronDown, ChevronUp,
-  Loader2, AlertCircle, ExternalLink, Layers, Layers,
-  CheckCircle2, XCircle,
+  Loader2, AlertCircle, ExternalLink, Layers,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────
