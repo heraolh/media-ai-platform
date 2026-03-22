@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 // Allow up to 5 minutes for the full pipeline
 export const maxDuration = 300;
 
-const MINIMAX_BASE = "https://api.minimaxi.chat";
+const MINIMAX_BASE = "https://api.minimax.chat";
 
 function minimaxHeaders() {
   const apiKey = process.env.MINIMAX_API_KEY;
