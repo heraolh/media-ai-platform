@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { uploadToR2 } from "@/lib/r2";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -54,11 +55,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // 如果已成功，检查 video_url 是否为永久 URL（Supabase 存储）
-    // 若是 MiniMax 临时 URL 则继续往下重新转存
+    // 如果已成功，检查 video_url 是否为永久 R2 URL
     if (record.status === "success") {
       const url = record.video_url ?? "";
-      const isPersistent = url.includes(".supabase.co") || url.includes(".supabase.in");
+      const isPersistent = url.includes(".r2.dev");
       if (isPersistent) {
         return NextResponse.json({
           status: record.status,
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
         });
       }
       // 临时 URL：继续执行下方转存逻辑
-      console.log("[video-status] 检测到临时 URL，尝试重新转存...");
+      console.log("[video-status] 检测到临时 URL，尝试重新转存到 R2...");
     }
 
     // 还在处理中：查询 MiniMax API
@@ -113,38 +113,23 @@ export async function GET(req: NextRequest) {
             console.log("[video-status] 视频下载 URL:", videoUrl);
           }
 
-          // 尝试将视频下载并永久保存到 Supabase Storage
+          // 下载视频并永久保存到 R2
           let persistentUrl: string | undefined;
           if (videoUrl) {
             try {
-              console.log("[video-status] 开始下载视频到 Supabase Storage...");
+              console.log("[video-status] 开始下载视频并上传到 R2...");
               const videoResp = await fetch(videoUrl);
               if (!videoResp.ok) {
                 throw new Error(`下载视频失败: HTTP ${videoResp.status}`);
               }
               const videoBuffer = await videoResp.arrayBuffer();
-              const storagePath = `videos/${user.id}/${taskId}.mp4`;
+              const storageKey = `videos/${user.id}/${taskId}.mp4`;
 
-              const { error: uploadError } = await supabase.storage
-                .from("media-files")
-                .upload(storagePath, videoBuffer, {
-                  contentType: "video/mp4",
-                  upsert: true,
-                });
-
-              if (uploadError) {
-                throw new Error(`上传到 Supabase 失败: ${uploadError.message}`);
-              }
-
-              const { data: publicUrlData } = supabase.storage
-                .from("media-files")
-                .getPublicUrl(storagePath);
-
-              persistentUrl = publicUrlData?.publicUrl;
-              console.log("[video-status] 视频已保存到 Supabase:", persistentUrl);
+              persistentUrl = await uploadToR2(storageKey, videoBuffer, "video/mp4");
+              console.log("[video-status] 视频已保存到 R2:", persistentUrl);
             } catch (storageErr) {
               // 存储失败不影响主流程，保留原始 MiniMax URL
-              console.error("[video-status] 保存到 Supabase 失败，使用原始 URL:", storageErr);
+              console.error("[video-status] 保存到 R2 失败，使用原始 URL:", storageErr);
             }
           }
 

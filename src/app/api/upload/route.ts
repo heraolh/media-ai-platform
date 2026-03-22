@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { uploadToR2 } from '@/lib/r2'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -24,30 +25,18 @@ export async function POST(request: NextRequest) {
 
     // 生成唯一文件名
     const fileExt = file.name.split('.').pop()
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`
+    const timestamp = Date.now()
+    const key = `${user.id}/${timestamp}.${fileExt}`
 
     // 转换为 ArrayBuffer
     const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
 
-    // 上传到 Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('media-files')
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: false,
-      })
-
-    if (error) throw error
-
-    // 获取公开 URL
-    const { data: publicData } = supabase.storage
-      .from('media-files')
-      .getPublicUrl(data.path)
+    // 上传到 R2
+    const url = await uploadToR2(key, arrayBuffer, file.type)
 
     return NextResponse.json({
-      url: publicData.publicUrl,
-      path: data.path,
+      url,
+      path: key,
     })
   } catch (error) {
     console.error('Upload error:', error)

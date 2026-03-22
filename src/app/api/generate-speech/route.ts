@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { uploadToR2 } from "@/lib/r2";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -101,31 +102,10 @@ export async function POST(req: NextRequest) {
 
       const arrayBuffer = await response.arrayBuffer();
 
-      // 上传到 Supabase Storage
-      const storagePath = `audio/${user.id}/${record.id}.mp3`;
-      let audioUrl: string;
-      let storageFinalPath: string | null = null;
-
-      const { error: uploadError } = await supabase.storage
-        .from("media-files")
-        .upload(storagePath, arrayBuffer, {
-          contentType: "audio/mpeg",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.warn("[generate-speech] 上传 Storage 失败，使用 base64:", uploadError.message);
-        // Fallback：base64 data URL
-        const base64 = Buffer.from(arrayBuffer).toString("base64");
-        audioUrl = `data:audio/mp3;base64,${base64}`;
-      } else {
-        const { data: publicUrlData } = supabase.storage
-          .from("media-files")
-          .getPublicUrl(storagePath);
-        audioUrl = publicUrlData.publicUrl;
-        storageFinalPath = storagePath;
-        console.log("[generate-speech] 音频已保存到 Storage:", audioUrl);
-      }
+      // 上传到 R2
+      const storageKey = `audio/${user.id}/${record.id}.mp3`;
+      const audioUrl = await uploadToR2(storageKey, arrayBuffer, "audio/mpeg");
+      console.log("[generate-speech] 音频已保存到 R2:", audioUrl);
 
       // 扣除积分
       const newCredits = currentCredits - SPEECH_CREDIT_COST;
@@ -142,7 +122,7 @@ export async function POST(req: NextRequest) {
         .update({
           status: "completed",
           audio_url: audioUrl,
-          storage_path: storageFinalPath,
+          storage_path: storageKey,
         })
         .eq("id", record.id);
 
