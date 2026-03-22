@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   // If Supabase isn't configured yet, don't block access.
   if (!supabaseUrl || !supabaseAnonKey) return NextResponse.next();
 
@@ -51,10 +51,7 @@ export const config = {
      * - _next/image   (image optimisation)
      * - favicon.ico
      * - public assets (svg, png, etc.)
-     *
-     * This ensures the middleware runs on both page routes and API
-     * routes so that session cookies are always refreshed.
      */
-    "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon\.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

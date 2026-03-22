@@ -7,6 +7,7 @@ import { VideoGenerator } from '@/components/VideoGenerator'
 import { UnifiedHistory } from '@/components/UnifiedHistory'
 import { CreditSystem } from '@/components/CreditSystem'
 import { LogoutButton } from '@/components/LogoutButton'
+import { SmartKit } from '@/components/SmartKit'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -32,24 +33,36 @@ export default async function DashboardPage() {
         {/* 积分系统 */}
         <CreditSystem />
 
-        {/* AI 生图 */}
-        <ImageGenerator />
+        {/* SmartKit 智能营销套件 */}
+        <SmartKit />
 
-        {/* AI 语音 */}
-        <SpeechGenerator />
+        {/* 独立功能（高级模式） */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-slate-700" />
+            <span className="text-sm font-medium text-slate-400 px-2">独立功能（高级模式）</span>
+            <div className="flex-1 h-px bg-slate-700" />
+          </div>
 
-        {/* AI 视频 */}
-        <VideoGenerator />
+          {/* AI 生图 */}
+          <ImageGenerator />
 
-        {/* 生成历史（图片 / 语音 / 视频统一标签页） */}
-        <UnifiedHistory />
+          {/* AI 语音 */}
+          <SpeechGenerator />
 
-        {/* 文件上传 */}
-        <div className="mb-8 p-6 bg-slate-800 rounded-lg border border-slate-700">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <span>📁</span> 文件上传
-          </h2>
-          <FileUpload />
+          {/* AI 视频 */}
+          <VideoGenerator />
+
+          {/* 生成历史（图片 / 语音 / 视频统一标签页） */}
+          <UnifiedHistory />
+
+          {/* 文件上传 */}
+          <div className="mb-8 p-6 bg-slate-800 rounded-lg border border-slate-700">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <span>📁</span> 文件上传
+            </h2>
+            <FileUpload />
+          </div>
         </div>
       </div>
     </div>
