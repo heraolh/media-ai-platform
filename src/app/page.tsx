@@ -17,9 +17,14 @@ export default function Home() {
           >
             开始体验
           </Link>
-          <button className="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-colors">
+          <Link
+            href="https://github.com/heraolh/media-ai-platform#readme"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-colors"
+          >
             查看文档
-          </button>
+          </Link>
         </div>
 
         <div className="mt-12 grid grid-cols-3 gap-4 text-sm text-slate-400">
